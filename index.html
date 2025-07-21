@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>FM AUTO - Catalogue</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #f2f6ff, #e6ecff);
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      text-align: center;
+      padding: 30px 10px 10px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .logo {
+      max-width: 140px;
+    }
+    h1 {
+      font-size: 24px;
+      margin: 10px 0;
+      color: #003366;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+    input[type="file"], #search {
+      display: block;
+      margin: 20px auto;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      font-size: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: center;
+    }
+    th {
+      background: #003366;
+      color: white;
+    }
+    img {
+      max-height: 80px;
+    }
+    #partsTable {
+      display: none;
+    }
+    .no-results {
+      text-align: center;
+      color: #777;
+      font-style: italic;
+      margin-top: 20px;
+    }
+    .loading {
+      text-align: center;
+      margin: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="LOGO FM CLEAN AUTO.png" alt="FM AUTO Logo" class="logo">
+    <h1>Catalogue FM AUTO</h1>
+  </header>
+
+  <div class="container">
+    <input type="file" id="excelFiles" accept=".xlsx,.xls" multiple>
+    <input type="text" id="search" placeholder="🔍 Entrez la référence ou le nom de pièce...">
+    <div class="loading" id="loading">Chargement en cours...</div>
+    <table id="partsTable">
+      <thead>
+        <tr>
+          <th>Référence</th>
+          <th>Nom FR</th>
+          <th>Nom EN</th>
+          <th>Image</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div id="noResults" class="no-results" style="display:none;">Aucun résultat trouvé.</div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    const input = document.getElementById('excelFiles');
+    const searchInput = document.getElementById('search');
+    const tableBody = document.querySelector('#partsTable tbody');
+    const table = document.getElementById('partsTable');
+    const noResultsDiv = document.getElementById('noResults');
+    const loadingDiv = document.getElementById('loading');
+
+    let allRows = [];
+
+    function normalizeKey(key) {
+      if (!key) return '';
+      const lower = key.toLowerCase().trim();
+      if (lower.includes('référence') || lower.includes('reference') || lower.includes('ref')) return 'ref';
+      if (lower.includes('designation_fr') || lower.includes('designation fr') || lower.includes('nom fr') || lower.includes('fr')) return 'fr';
+      if (lower.includes('designation_en') || lower.includes('designation en') || lower.includes('nom en') || lower.includes('en')) return 'en';
+      if (lower.includes('image') || lower.includes('photo')) return 'image';
+      return key;
+    }
+
+    input.addEventListener('change', async (e) => {
+      allRows = [];
+      tableBody.innerHTML = "";
+      table.style.display = "none";
+      noResultsDiv.style.display = "none";
+      loadingDiv.style.display = "block";
+
+      try {
+        for (const file of e.target.files) {
+          const data = await file.arrayBuffer();
+          const workbook = XLSX.read(data);
+          
+          workbook.SheetNames.forEach(sheet => {
+            const raw = XLSX.utils.sheet_to_json(workbook.Sheets[sheet], { defval: "" });
+            
+            raw.forEach(row => {
+              const cleaned = { ref: "", fr: "", en: "", image: "" };
+              
+              for (const key in row) {
+                const norm = normalizeKey(key);
+                const value = String(row[key]).trim();
+                
+                if (norm === 'ref') cleaned.ref = value;
+                else if (norm === 'fr') cleaned.fr = value;
+                else if (norm === 'en') cleaned.en = value;
+                else if (norm === 'image') cleaned.image = value;
+              }
+              
+              if (cleaned.ref) {
+                // Correction spéciale pour les formules Excel dans la colonne Image
+                if (cleaned.image.startsWith('="images/') && cleaned.image.endsWith('.jpg"')) {
+                  cleaned.image = cleaned.image.replace(/^="|"$/g, '');
+                }
+                allRows.push(cleaned);
+              }
+            });
+          });
+        }
+        
+        displayRows(allRows);
+      } catch (error) {
+        console.error("Erreur lors du chargement du fichier:", error);
+        alert("Une erreur est survenue lors du chargement du fichier.");
+      } finally {
+        loadingDiv.style.display = "none";
+      }
+    });
+
+    function displayRows(rows) {
+      tableBody.innerHTML = "";
+      
+      if (rows.length === 0) {
+        table.style.display = "none";
+        noResultsDiv.style.display = "block";
+        return;
+      }
+      
+      noResultsDiv.style.display = "none";
+      
+      rows.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.ref}</td>
+          <td>${row.fr}</td>
+          <td>${row.en}</td>
+          <td><img src="${row.image}" onerror="this.style.display='none';"></td>
+        `;
+        tableBody.appendChild(tr);
+      });
+      
+      table.style.display = "table";
+    }
+
+    searchInput.addEventListener('input', () => {
+      const keyword = searchInput.value.toLowerCase().trim();
+      
+      if (!keyword) {
+        displayRows(allRows);
+        return;
+      }
+      
+      const filtered = allRows.filter(row =>
+        (row.ref && row.ref.toLowerCase().includes(keyword)) ||
+        (row.fr && row.fr.toLowerCase().includes(keyword)) ||
+        (row.en && row.en.toLowerCase().includes(keyword))
+      );
+      
+      displayRows(filtered);
+    });
+  </script>
+</body>
+</html>
