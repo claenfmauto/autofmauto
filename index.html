@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Catalogue FM AUTO - Recherche de pièces automobiles">
+  <meta name="theme-color" content="#2c3e50">
   <title>FM AUTO - Catalogue Mobile</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="manifest" href="manifest.json">
   <style>
     /* أنماط شاشة الدخول */
     .login-overlay {
@@ -13,77 +16,106 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.9);
+      background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 100%);
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 1000;
       flex-direction: column;
+      animation: fadeIn 0.5s ease;
     }
     
     .login-box {
       background: white;
       padding: 2rem;
-      border-radius: 12px;
+      border-radius: 16px;
       width: 90%;
       max-width: 400px;
       text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      transform: translateY(0);
+      transition: all 0.4s ease;
+    }
+    
+    .login-box.shake {
+      animation: shake 0.5s;
     }
     
     .login-logo {
-      width: 100px;
+      width: 120px;
       margin-bottom: 1.5rem;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
     }
     
     .login-title {
       font-size: 1.5rem;
       color: #2c3e50;
       margin-bottom: 1.5rem;
+      font-weight: 700;
     }
     
     .login-input {
       width: 100%;
       padding: 1rem;
       margin-bottom: 1rem;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      border: 2px solid #eee;
+      border-radius: 10px;
       font-size: 1rem;
-    }
-    
-    .login-btn {
-      background: #2c3e50;
-      color: white;
-      border: none;
-      padding: 1rem;
-      border-radius: 8px;
-      width: 100%;
-      font-size: 1rem;
-      cursor: pointer;
       transition: all 0.3s ease;
     }
     
+    .login-input:focus {
+      border-color: #3498db;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+    
+    .login-btn {
+      background: linear-gradient(to right, #2c3e50, #3498db);
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 10px;
+      width: 100%;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
     .login-btn:hover {
-      background: #1a2a3a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    
+    .login-btn:active {
+      transform: translateY(0);
     }
     
     .error-message {
       color: #e74c3c;
       margin-top: 1rem;
       display: none;
+      font-weight: 500;
     }
 
-    /* بقية الأنماط الأصلية بدون تغيير */
+    /* بقية الأنماط المحسنة */
     :root {
       --primary-color: #2c3e50;
+      --primary-light: #3d566e;
       --secondary-color: #3498db;
       --accent-color: #e74c3c;
       --light-color: #ffffff;
       --dark-color: #1a2a3a;
       --text-color: #333333;
+      --text-light: #7f8c8d;
       --border-radius: 12px;
       --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       --transition: all 0.3s ease;
+      --success-color: #27ae60;
+      --warning-color: #f39c12;
+      --error-color: #e74c3c;
     }
 
     * {
@@ -118,8 +150,9 @@
     }
 
     header {
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(5px);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       color: var(--primary-color);
       padding: 0.8rem 1rem;
       position: sticky;
@@ -141,6 +174,7 @@
     .header-logo {
       width: 40px;
       height: 40px;
+      border-radius: 8px;
     }
 
     h1 {
@@ -155,8 +189,9 @@
 
     .search-section {
       padding: 1rem;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(5px);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       position: sticky;
       top: 56px;
       z-index: 90;
@@ -177,6 +212,7 @@
       background-color: rgba(245, 245, 245, 0.9);
       transition: var(--transition);
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid rgba(0,0,0,0.05);
     }
 
     #search:focus {
@@ -195,18 +231,31 @@
     }
 
     .results-container {
-      padding: 0 1rem 2rem;
+      padding: 0 1rem 5rem;
     }
 
     .part-card {
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(5px);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border-radius: var(--border-radius);
       padding: 1.2rem;
       margin-bottom: 1.2rem;
       box-shadow: var(--box-shadow);
       transition: var(--transition);
       border: 1px solid rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .part-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--secondary-color), var(--primary-color));
     }
 
     .card-header {
@@ -235,6 +284,13 @@
       min-height: 200px;
       max-height: 300px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: relative;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .part-image-container:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
     .part-image {
@@ -252,6 +308,7 @@
     .detail-row {
       display: flex;
       margin-bottom: 0.8rem;
+      align-items: flex-start;
     }
 
     .detail-label {
@@ -259,11 +316,13 @@
       min-width: 80px;
       color: var(--primary-color);
       font-size: 0.9rem;
+      padding: 0.2rem 0;
     }
 
     .detail-value {
       flex: 1;
       font-size: 0.95rem;
+      padding: 0.2rem 0;
     }
 
     .status-message {
@@ -272,10 +331,15 @@
       border-radius: var(--border-radius);
       margin: 1rem;
       font-weight: 500;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(5px);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       box-shadow: var(--box-shadow);
       border: 1px solid rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
 
     .loading {
@@ -286,8 +350,9 @@
       gap: 1rem;
       padding: 2rem;
       display: none;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(5px);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border-radius: var(--border-radius);
       box-shadow: var(--box-shadow);
       margin: 1rem;
@@ -310,14 +375,22 @@
     .no-results {
       text-align: center;
       padding: 2rem;
-      color: #7f8c8d;
+      color: var(--text-light);
       display: none;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(5px);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border-radius: var(--border-radius);
       box-shadow: var(--box-shadow);
       margin: 1rem;
       border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .no-results i {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+      opacity: 0.7;
     }
 
     .image-modal {
@@ -326,7 +399,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.95);
+      background: rgba(0,0,0,0.97);
       z-index: 300;
       display: flex;
       align-items: center;
@@ -347,6 +420,7 @@
       object-fit: contain;
       transform: scale(0.9);
       transition: var(--transition);
+      border-radius: 4px;
     }
 
     .image-modal.active .modal-image {
@@ -364,6 +438,7 @@
       cursor: pointer;
       opacity: 0.8;
       transition: var(--transition);
+      z-index: 310;
     }
 
     .close-modal:hover {
@@ -374,10 +449,11 @@
     footer {
       text-align: center;
       padding: 1.2rem;
-      color: #7f8c8d;
+      color: var(--text-light);
       font-size: 0.8rem;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(5px);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border-top: 1px solid rgba(0,0,0,0.05);
       position: fixed;
       bottom: 0;
@@ -388,6 +464,53 @@
       transform: scale(0.98);
     }
 
+    /* تحسينات للواجهة */
+    .copy-btn {
+      background: rgba(52, 152, 219, 0.1);
+      border: none;
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+      color: var(--secondary-color);
+      cursor: pointer;
+      transition: var(--transition);
+      margin-left: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .copy-btn:hover {
+      background: rgba(52, 152, 219, 0.2);
+    }
+
+    .copy-btn i {
+      font-size: 0.7rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary-color);
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 400;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      bottom: 100px;
+    }
+
+    /* تحسينات للشاشات الكبيرة */
     @media (min-width: 768px) {
       .logo-background {
         background-size: 30%;
@@ -401,16 +524,101 @@
       .part-image {
         max-height: 400px;
       }
+
+      .results-container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+    }
+
+    /* أنيميشنز */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+
+    /* تحسينات PWA */
+    #installBtn {
+      display: none;
+      background: var(--secondary-color);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-left: auto;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    #installBtn:hover {
+      background: var(--primary-color);
+      transform: translateY(-2px);
+    }
+
+    /* تحسينات للبحث */
+    .search-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .clear-search {
+      background: rgba(231, 76, 60, 0.1);
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--error-color);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .clear-search:hover {
+      background: rgba(231, 76, 60, 0.2);
+    }
+
+    /* تحسينات للبطاقات */
+    .part-meta {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .part-meta-item {
+      background: rgba(52, 152, 219, 0.1);
+      padding: 0.3rem 0.6rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      color: var(--secondary-color);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .part-meta-item i {
+      font-size: 0.7rem;
     }
   </style>
 </head>
 <body>
   <!-- شاشة الدخول -->
   <div class="login-overlay" id="loginOverlay">
-    <div class="login-box">
+    <div class="login-box" id="loginBox">
       <img src="LOGO FM CLEAN AUTO.png" alt="FM AUTO Logo" class="login-logo">
       <h2 class="login-title">Accès au Catalogue</h2>
-      <input type="password" id="passwordInput" class="login-input" placeholder="Mot de passe">
+      <input type="password" id="passwordInput" class="login-input" placeholder="Mot de passe" autocomplete="current-password">
       <button id="loginBtn" class="login-btn">Se connecter</button>
       <div id="errorMessage" class="error-message">Mot de passe incorrect</div>
     </div>
@@ -424,12 +632,20 @@
       <img src="LOGO FM CLEAN AUTO.png" alt="FM AUTO Logo" class="header-logo">
       <h1>Catalogue FM AUTO</h1>
     </div>
+    <button id="installBtn" title="Installer l'application">
+      <i class="fas fa-download"></i> Installer
+    </button>
   </header>
 
   <div class="search-section">
     <div class="search-container">
       <i class="fas fa-search search-icon"></i>
-      <input type="text" id="search" placeholder="Rechercher par référence, désignation...">
+      <input type="text" id="search" placeholder="Rechercher par référence, désignation..." autocomplete="off">
+    </div>
+    <div class="search-actions" id="searchActions" style="display: none;">
+      <button class="clear-search" id="clearSearch">
+        <i class="fas fa-times"></i> Effacer
+      </button>
     </div>
   </div>
 
@@ -448,7 +664,7 @@
     </div>
     
     <div class="no-results" id="noResults">
-      <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem; color: var(--primary-color);"></i>
+      <i class="fas fa-search"></i>
       <h3>Aucun résultat trouvé</h3>
       <p>Essayez avec d'autres termes de recherche</p>
     </div>
@@ -457,6 +673,8 @@
   <footer>
     <p>FM AUTO &copy; <span id="currentYear"></span> - Tous droits réservés</p>
   </footer>
+
+  <div class="toast" id="toast">Texte copié!</div>
 
   <div class="image-modal" id="imageModal">
     <button class="close-modal" id="closeModal">
@@ -467,32 +685,54 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script>
-    // نظام الدخول بكلمة السر
+    // نظام الدخول بكلمة السر المحسن
     const loginOverlay = document.getElementById('loginOverlay');
+    const loginBox = document.getElementById('loginBox');
     const passwordInput = document.getElementById('passwordInput');
     const loginBtn = document.getElementById('loginBtn');
     const errorMessage = document.getElementById('errorMessage');
     
-    // كلمة السر الصحيحة
+    // كلمة السر الصحيحة (يجب تغييرها في البيئة الحقيقية)
     const CORRECT_PASSWORD = "fmautopartest";
     
-    loginBtn.addEventListener('click', () => {
+    // تحسين تجربة المستخدم عند الدخول
+    function handleLogin() {
       if (passwordInput.value === CORRECT_PASSWORD) {
-        loginOverlay.style.display = 'none';
-        loadExcelFile(); // تحميل البيانات بعد الدخول
+        // تخزين حالة الدخول في localStorage
+        localStorage.setItem('isAuthenticated', 'true');
+        loginOverlay.style.opacity = '0';
+        setTimeout(() => {
+          loginOverlay.style.display = 'none';
+          loadExcelFile(); // تحميل البيانات بعد الدخول
+        }, 300);
       } else {
         errorMessage.style.display = 'block';
+        loginBox.classList.add('shake');
+        setTimeout(() => loginBox.classList.remove('shake'), 500);
+        passwordInput.focus();
       }
-    });
+    }
+    
+    loginBtn.addEventListener('click', handleLogin);
     
     // السماح بالدخول بالضغط على Enter
     passwordInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
-        loginBtn.click();
+        handleLogin();
       }
     });
 
-    // بقية الكود الأصلي بدون تغيير
+    // التحقق من حالة الدخول عند تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('isAuthenticated') === 'true') {
+        loginOverlay.style.display = 'none';
+        loadExcelFile();
+      } else {
+        passwordInput.focus();
+      }
+    });
+
+    // بقية الكود المحسن
     const searchInput = document.getElementById('search');
     const resultsCards = document.getElementById('resultsCards');
     const noResultsDiv = document.getElementById('noResults');
@@ -501,18 +741,60 @@
     const imageModal = document.getElementById('imageModal');
     const modalImage = document.getElementById('modalImage');
     const closeModal = document.getElementById('closeModal');
+    const toast = document.getElementById('toast');
+    const clearSearch = document.getElementById('clearSearch');
+    const searchActions = document.getElementById('searchActions');
+    const installBtn = document.getElementById('installBtn');
     
     let allRows = [];
+    let deferredPrompt;
     
+    // تحسينات PWA
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'block';
+    });
+    
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          installBtn.style.display = 'none';
+        }
+        deferredPrompt = null;
+      }
+    });
+    
+    // عرض رسالة toast
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    
+    // نسخ النص إلى الحافظة
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Texte copié!');
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+      });
+    }
+    
+    // تحميل ملف Excel
     async function loadExcelFile() {
       allRows = [];
       resultsCards.innerHTML = "";
       noResultsDiv.style.display = "none";
       loadingDiv.style.display = "flex";
-      statusMessage.textContent = "Chargement des données en cours...";
+      statusMessage.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Chargement des données en cours...`;
       
       try {
         const response = await fetch('A1.xlsx');
+        if (!response.ok) throw new Error('Erreur de réseau');
+        
         const data = await response.arrayBuffer();
         const workbook = XLSX.read(data);
         
@@ -525,6 +807,8 @@
             const fr = row['Designation_FR'] || row['designation_fr'] || row['Nom FR'] || "";
             const en = row['Designation_EN'] || row['designation_en'] || row['Nom EN'] || "";
             const image = row['Image'] || row['image'] || "";
+            const category = row['Catégorie'] || row['categorie'] || row['Category'] || "";
+            const price = row['Prix'] || row['prix'] || row['Price'] || "";
             
             if (reference) {
               let imageUrl = image;
@@ -536,27 +820,36 @@
                 ref: reference.toString().trim(),
                 fr: fr.toString().trim(),
                 en: en.toString().trim(),
-                image: imageUrl.toString().trim()
+                image: imageUrl.toString().trim(),
+                category: category.toString().trim(),
+                price: price.toString().trim()
               });
             }
           });
         });
         
         if (allRows.length > 0) {
-          statusMessage.innerHTML = `<i class="fas fa-check-circle" style="color: #27ae60;"></i> ${allRows.length} pièces chargées. Commencez à rechercher.`;
+          statusMessage.innerHTML = `<i class="fas fa-check-circle" style="color: var(--success-color);"></i> ${allRows.length} pièces chargées. Commencez à rechercher.`;
           searchInput.disabled = false;
           searchInput.focus();
+          
+          // تحليل الفئات لإنشاء تصفية
+          const categories = [...new Set(allRows.map(item => item.category).filter(Boolean))];
+          if (categories.length > 0) {
+            // يمكن إضافة واجهة تصفية حسب الفئة هنا
+          }
         } else {
-          statusMessage.innerHTML = `<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Aucune donnée valide trouvée dans le fichier.`;
+          statusMessage.innerHTML = `<i class="fas fa-exclamation-triangle" style="color: var(--warning-color);"></i> Aucune donnée valide trouvée dans le fichier.`;
         }
       } catch (error) {
         console.error("Error loading file:", error);
-        statusMessage.innerHTML = `<i class="fas fa-times-circle" style="color: #e74c3c;"></i> Erreur lors du chargement du fichier: ${error.message}`;
+        statusMessage.innerHTML = `<i class="fas fa-times-circle" style="color: var(--error-color);"></i> Erreur lors du chargement du fichier: ${error.message}`;
       } finally {
         loadingDiv.style.display = "none";
       }
     }
 
+    // عرض البطاقات مع تحسينات جديدة
     function displayCards(rows) {
       resultsCards.innerHTML = "";
       
@@ -570,15 +863,32 @@
       rows.forEach(row => {
         const card = document.createElement('div');
         card.className = 'part-card';
+        
+        // إنشاء زر النسخ
+        const copyButton = `<button class="copy-btn" onclick="copyToClipboard('${row.ref}')">
+          <i class="far fa-copy"></i> Copier
+        </button>`;
+        
+        // إنشاء بيانات التعريف إذا كانت موجودة
+        let metaData = '';
+        if (row.category || row.price) {
+          metaData = `<div class="part-meta">
+            ${row.category ? `<span class="part-meta-item"><i class="fas fa-tag"></i> ${row.category}</span>` : ''}
+            ${row.price ? `<span class="part-meta-item"><i class="fas fa-euro-sign"></i> ${row.price}</span>` : ''}
+          </div>`;
+        }
+        
         card.innerHTML = `
           <div class="card-header">
-            <div class="part-ref">${row.ref}</div>
+            <div class="part-ref">${row.ref} ${copyButton}</div>
           </div>
+          ${metaData}
           ${row.image ? `
             <div class="part-image-container">
               <img src="${row.image}" class="part-image" 
                    onclick="showImageModal('${row.image}')"
-                   onerror="this.parentElement.style.display='none'">
+                   onerror="this.parentElement.style.display='none'"
+                   alt="Image de la pièce ${row.ref}">
             </div>
           ` : ''}
           <div class="part-details">
@@ -596,6 +906,7 @@
       });
     }
 
+    // تحسين وظيفة البحث
     function searchParts() {
       const keyword = searchInput.value.toLowerCase().trim();
       
@@ -603,24 +914,29 @@
         noResultsDiv.style.display = "none";
         resultsCards.innerHTML = "";
         statusMessage.innerHTML = `<i class="fas fa-info-circle"></i> ${allRows.length} pièces disponibles. Tapez pour rechercher.`;
+        searchActions.style.display = "none";
         return;
       }
+      
+      searchActions.style.display = "flex";
       
       const filtered = allRows.filter(row =>
         (row.ref && row.ref.toLowerCase().includes(keyword)) ||
         (row.fr && row.fr.toLowerCase().includes(keyword)) ||
-        (row.en && row.en.toLowerCase().includes(keyword))
+        (row.en && row.en.toLowerCase().includes(keyword)) ||
+        (row.category && row.category.toLowerCase().includes(keyword))
       );
       
       displayCards(filtered);
       
       if (filtered.length > 0) {
-        statusMessage.innerHTML = `<i class="fas fa-check-circle" style="color: #27ae60;"></i> ${filtered.length} résultat(s) trouvé(s) pour "${keyword}"`;
+        statusMessage.innerHTML = `<i class="fas fa-check-circle" style="color: var(--success-color);"></i> ${filtered.length} résultat(s) trouvé(s) pour "${keyword}"`;
       } else {
-        statusMessage.innerHTML = `<i class="fas fa-search" style="color: #e74c3c;"></i> Aucun résultat pour "${keyword}"`;
+        statusMessage.innerHTML = `<i class="fas fa-search" style="color: var(--error-color);"></i> Aucun résultat pour "${keyword}"`;
       }
     }
 
+    // تحسين عرض الصورة في المودال
     window.showImageModal = function(imageUrl) {
       modalImage.src = imageUrl;
       imageModal.classList.add('active');
@@ -632,10 +948,18 @@
       document.body.style.overflow = '';
     });
 
+    // تحسينات البحث مع إضافة تأخير
     let searchTimer;
     searchInput.addEventListener('input', () => {
       clearTimeout(searchTimer);
       searchTimer = setTimeout(searchParts, 300);
+    });
+
+    // مسح البحث
+    clearSearch.addEventListener('click', () => {
+      searchInput.value = '';
+      searchInput.focus();
+      searchParts();
     });
 
     imageModal.addEventListener('click', (e) => {
@@ -645,13 +969,26 @@
       }
     });
 
+    // إضافة السنة الحالية للتذييل
     document.getElementById('currentYear').textContent = new Date().getFullYear();
 
+    // تحسين تجربة المستخدم
     document.addEventListener('click', (e) => {
       if (e.target !== searchInput) {
         searchInput.blur();
       }
     });
+
+    // إضافة خدمة Worker للتخزين المؤقت
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(registration => {
+          console.log('ServiceWorker registration successful');
+        }).catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
   </script>
 </body>
 </html>
